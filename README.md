@@ -1,2 +1,2 @@
-# Call-Name-anouncer-for-whatsap
+# Call-Name-anouncer-for-whatsaap
 Call name anouncer for whatsapp calls only
