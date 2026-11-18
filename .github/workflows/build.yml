@@ -10,9 +10,21 @@ jobs:
       - name: Unpack project zip
         run: |
           mkdir -p "$RUNNER_TEMP/proj"
-          if ls ./*.zip >/dev/null 2>&1; then
-            unzip -o -q "$(ls -t ./*.zip | head -1)" -d "$RUNNER_TEMP/proj"
-          else
-            cp -r . "$RUNNER_TEMP/proj"
-          fi
-          DIR=$(dirname "$(find "$RUNNER_TEMP/proj" -name settings.gradle.kts | head -
+          unzip -o -q ./*.zip -d "$RUNNER_TEMP/proj"
+          find "$RUNNER_TEMP/proj" -name settings.gradle.kts -printf '%h\n' | head -1 > "$RUNNER_TEMP/dir.txt"
+          read -r DIR < "$RUNNER_TEMP/dir.txt"
+          echo "PROJECT_DIR=$DIR" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - name: Build
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: gradle assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: call-announcer-apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
